@@ -1,7 +1,7 @@
 /**
  * temporal-date-time.module
  */
-// import 'temporal-polyfill/global'
+import 'temporal-polyfill/global'
 import { NgModule } from '@angular/core';
 import { PlatformModule } from '@angular/cdk/platform';
 import { DateTimeAdapter } from './date-time-adapter.class';
