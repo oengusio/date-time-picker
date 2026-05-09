@@ -140,7 +140,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(12, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO().with({ month: i }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ month: i }))
                 )
             );
         }
@@ -155,7 +155,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(7, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO().with({ day: i }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ day: i }))
                 )
             );
         }
@@ -263,6 +263,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     ): Temporal.ZonedDateTime {
         return Temporal.ZonedDateTime.from({
             year, month, day: date, hour: hours, minute: minutes, second: seconds,
+            timeZoneId: new Intl.DateTimeFormat().resolvedOptions().timeZone,
         });
     }
 
@@ -289,7 +290,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
                 });
             }
 
-            displayFormat = { ...displayFormat, timeZone: 'utc' };
+            displayFormat = { ...displayFormat, timeZone: new Intl.DateTimeFormat().resolvedOptions().timeZone };
             const dtf = new Intl.DateTimeFormat(this.getLocale(), displayFormat);
             return this.stripDirectionalityCharacters(this._format(dtf, date));
         }
@@ -301,7 +302,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
         // There is no way using the native JS Date to set the parse format or locale
         if (typeof value === 'number') {
             // TODO: meh
-            return Temporal.Instant.fromEpochMilliseconds(value).toZonedDateTimeISO('UTC');
+            return Temporal.Instant.fromEpochMilliseconds(value).toZonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone);
         }
         return value ? Temporal.ZonedDateTime.from(value) : null;
     }
