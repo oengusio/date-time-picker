@@ -140,7 +140,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(12, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ month: i + 1 }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ month: i + 1 }))
                 )
             );
         }
@@ -155,7 +155,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(7, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ day: i + 1 }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
                 )
             );
         }
@@ -171,7 +171,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(31, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO().with({ day: i + 1 }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
                 )
             );
         }
@@ -263,7 +263,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     ): Temporal.ZonedDateTime {
         return Temporal.ZonedDateTime.from({
             year, month, day: date, hour: hours, minute: minutes, second: seconds,
-            timeZone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timeZone: this.timezone,
         });
     }
 
@@ -272,7 +272,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     }
 
     public now(): Temporal.ZonedDateTime {
-        return Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone);
+        return Temporal.Now.zonedDateTimeISO(this.timezone);
     }
 
     public format(date: Temporal.ZonedDateTime, displayFormat: any): string {
@@ -290,7 +290,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
                 });
             }
 
-            displayFormat = { ...displayFormat, timeZone: new Intl.DateTimeFormat().resolvedOptions().timeZone };
+            displayFormat = { ...displayFormat, timeZone: this.timezone };
             const dtf = new Intl.DateTimeFormat(this.getLocale(), displayFormat);
             return this.stripDirectionalityCharacters(this._format(dtf, date));
         }
@@ -302,7 +302,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
         // There is no way using the native JS Date to set the parse format or locale
         if (typeof value === 'number') {
             // TODO: meh
-            return Temporal.Instant.fromEpochMilliseconds(value).toZonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone);
+            return Temporal.Instant.fromEpochMilliseconds(value).toZonedDateTimeISO(this.timezone);
         }
         return value ? Temporal.ZonedDateTime.from(value) : null;
     }
@@ -320,7 +320,15 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             // The `Date` constructor accepts formats other than ISO 8601, so we need to make sure the
             // string is the right format first.
             if (ISO_8601_REGEX.test(value)) {
-                const date = Temporal.ZonedDateTime.from(value);
+                let date
+
+                try {
+                    date = Temporal.ZonedDateTime.from(value);
+
+                } catch (ignored: any) {
+                    date = Temporal.Instant.from(value).toZonedDateTimeISO(this.timezone)
+                }
+
                 if (this.isValid(date)) {
                     return date;
                 }
@@ -347,5 +355,9 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
      */
     private _format(dtf: Intl.DateTimeFormat, date: Temporal.ZonedDateTime) {
         return dtf.format(date.epochMilliseconds);
+    }
+
+    private get timezone() {
+        return new Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 }
