@@ -140,7 +140,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(12, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ month: i }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ month: i + 1 }))
                 )
             );
         }
@@ -155,7 +155,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(7, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ day: i }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO(new Intl.DateTimeFormat().resolvedOptions().timeZone).with({ day: i + 1 }))
                 )
             );
         }
@@ -171,7 +171,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             });
             return range(31, i =>
                 this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO().with({ day: i }))
+                    this._format(dtf, Temporal.Now.zonedDateTimeISO().with({ day: i + 1 }))
                 )
             );
         }
