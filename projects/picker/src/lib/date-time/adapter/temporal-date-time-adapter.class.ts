@@ -263,7 +263,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     ): Temporal.ZonedDateTime {
         return Temporal.ZonedDateTime.from({
             year, month, day: date, hour: hours, minute: minutes, second: seconds,
-            timeZoneId: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timeZone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
         });
     }
 
