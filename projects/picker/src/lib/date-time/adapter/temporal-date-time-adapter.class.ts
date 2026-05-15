@@ -222,7 +222,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     }
 
     public invalid(): Temporal.ZonedDateTime {
-        return new Temporal.ZonedDateTime(BigInt(NaN), 'UTC');
+        return null;
     }
 
     public isDateInstance(obj: any): boolean {
