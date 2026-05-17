@@ -25,8 +25,8 @@ const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|(?
 
 @Injectable()
 export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateTime> {
- 	public firstMonthOfTheYear: number = 0;
- 	public firstDayOfTheWeek: number = 0;
+ 	public firstMonthOfTheYear: number = 1;
+ 	public firstDayOfTheWeek: number = 1;
 
      private readonly nanoSecondsInMillisecond = 1000000;
 
@@ -60,7 +60,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     }
 
     public getMonth(date: Temporal.ZonedDateTime): number {
-        return date.month;
+        return date.month - 1;
     }
 
     public getDay(date: Temporal.ZonedDateTime): number {
@@ -262,7 +262,12 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
         seconds: number = 0
     ): Temporal.ZonedDateTime {
         return Temporal.ZonedDateTime.from({
-            year, month, day: date, hour: hours, minute: minutes, second: seconds,
+            year,
+            month: month + 1,
+            day: date,
+            hour: hours,
+            minute: minutes,
+            second: seconds,
             timeZone: this.timezone,
         });
     }
