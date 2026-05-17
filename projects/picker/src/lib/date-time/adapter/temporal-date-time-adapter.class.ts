@@ -1,5 +1,5 @@
 /**
- * native-date-time-adapter.class
+ * temporal-date-time-adapter.class
  */
 
 import { Inject, Injectable, Optional } from '@angular/core';
@@ -9,12 +9,6 @@ import {
     OWL_DATE_TIME_LOCALE
 } from './date-time-adapter.class';
 import { range } from '../../utils/array.utils';
-import {
-    DEFAULT_DATE_NAMES,
-    DEFAULT_DAY_OF_WEEK_NAMES,
-    DEFAULT_MONTH_NAMES,
-    SUPPORTS_INTL_API
-} from '../../utils/constants';
 
 /**
  * Matches strings that have the form of a valid RFC 3339 string
@@ -25,10 +19,10 @@ const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|(?
 
 @Injectable()
 export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateTime> {
- 	public firstMonthOfTheYear: number = 1;
- 	public firstDayOfTheWeek: number = 1;
+    public firstMonthOfTheYear = 1;
+    public firstDayOfTheWeek = -2; // WHY THE FUCK. No I don't know why this is -2. But it seems correct
 
-     private readonly nanoSecondsInMillisecond = 1000000;
+    private readonly nanoSecondsInMinute = 60000000000;
 
     /** Whether to clamp the date between 1 and 9999 to avoid IE and Edge errors. */
     private readonly _clampDate: boolean;
@@ -107,12 +101,12 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             // TODO: convert nanoseconds to milliseconds
             const timeStampLeft =
                 this.getTime(dateLeftStartOfDay) -
-                (dateLeftStartOfDay.offsetNanoseconds / this.nanoSecondsInMillisecond) *
-                    this.milliseondsInMinute;
+                (dateLeftStartOfDay.offsetNanoseconds / this.nanoSecondsInMinute) *
+                this.milliseondsInMinute;
             const timeStampRight =
                 this.getTime(dateRightStartOfDay) -
-                (dateRightStartOfDay.offsetNanoseconds / this.nanoSecondsInMillisecond) *
-                    this.milliseondsInMinute;
+                (dateRightStartOfDay.offsetNanoseconds / this.nanoSecondsInMinute) *
+                this.milliseondsInMinute;
             return Math.round(
                 (timeStampLeft - timeStampRight) / this.millisecondsInDay
             );
@@ -122,60 +116,50 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     }
 
     public getYearName(date: Temporal.ZonedDateTime): string {
-        if (SUPPORTS_INTL_API) {
-            const dtf = new Intl.DateTimeFormat(this.getLocale(), {
-                year: 'numeric',
-                timeZone: 'utc'
-            });
-            return this.stripDirectionalityCharacters(this._format(dtf, date));
-        }
-        return String(this.getYear(date));
+        const dtf = new Intl.DateTimeFormat(this.getLocale(), {
+            year: 'numeric',
+            timeZone: 'utc'
+        });
+
+        return this.stripDirectionalityCharacters(this._format(dtf, date));
     }
 
     public getMonthNames(style: 'long' | 'short' | 'narrow'): string[] {
-        if (SUPPORTS_INTL_API) {
-            const dtf = new Intl.DateTimeFormat(this.getLocale(), {
-                month: style,
-                timeZone: 'utc'
-            });
-            return range(12, i =>
-                this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ month: i + 1 }))
-                )
-            );
-        }
-        return DEFAULT_MONTH_NAMES[style];
+        const dtf = new Intl.DateTimeFormat(this.getLocale(), {
+            month: style,
+            timeZone: 'utc'
+        });
+        return range(12, i =>
+            this.stripDirectionalityCharacters(
+                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ month: i + 1 }))
+            )
+        );
     }
 
     public getDayOfWeekNames(style: 'long' | 'short' | 'narrow'): string[] {
-        if (SUPPORTS_INTL_API) {
-            const dtf = new Intl.DateTimeFormat(this.getLocale(), {
-                weekday: style,
-                timeZone: 'utc'
-            });
-            return range(7, i =>
-                this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
-                )
-            );
-        }
+        const dtf = new Intl.DateTimeFormat(this.getLocale(), {
+            weekday: style,
+            timeZone: 'utc'
+        });
 
-        return DEFAULT_DAY_OF_WEEK_NAMES[style];
+        return range(7, i =>
+            this.stripDirectionalityCharacters(
+                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
+            )
+        );
     }
 
     public getDateNames(): string[] {
-        if (SUPPORTS_INTL_API) {
-            const dtf = new Intl.DateTimeFormat(this.getLocale(), {
-                day: 'numeric',
-                timeZone: 'utc'
-            });
-            return range(31, i =>
-                this.stripDirectionalityCharacters(
-                    this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
-                )
-            );
-        }
-        return DEFAULT_DATE_NAMES;
+        const dtf = new Intl.DateTimeFormat(this.getLocale(), {
+            day: 'numeric',
+            timeZone: 'utc'
+        });
+
+        return range(31, i =>
+            this.stripDirectionalityCharacters(
+                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
+            )
+        );
     }
 
     public toIso8601(date: Temporal.ZonedDateTime): string {
@@ -192,25 +176,10 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
 
     public isSameDay(dateLeft: Temporal.ZonedDateTime, dateRight: Temporal.ZonedDateTime): boolean {
         if (this.isValid(dateLeft) && this.isValid(dateRight)) {
-            const dateLeftStartOfDay = dateLeft.with({
-                hour: 0,
-                minute: 0,
-                second: 0,
-                millisecond: 0,
-                microsecond: 0,
-                nanosecond: 0,
-            });
-            const dateRightStartOfDay = dateRight.with({
-                hour: 0,
-                minute: 0,
-                second: 0,
-                millisecond: 0,
-                microsecond: 0,
-                nanosecond: 0,
-            });
-
             return (
-                dateLeftStartOfDay.epochNanoseconds === dateRightStartOfDay.epochNanoseconds
+                dateLeft.year === dateRight.year &&
+                dateLeft.month === dateRight.month &&
+                dateLeft.day === dateRight.day
             );
         } else {
             return false;
@@ -285,22 +254,18 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             throw Error('JSNativeDate: Cannot format invalid date.');
         }
 
-        if (SUPPORTS_INTL_API) {
-            if (
-                this._clampDate &&
-                (date.year < 1 || date.year > 9999)
-            ) {
-                date = date.with({
-                    year: Math.max(1, Math.min(9999, date.year)),
-                });
-            }
-
-            displayFormat = { ...displayFormat, timeZone: this.timezone };
-            const dtf = new Intl.DateTimeFormat(this.getLocale(), displayFormat);
-            return this.stripDirectionalityCharacters(this._format(dtf, date));
+        if (
+            this._clampDate &&
+            (date.year < 1 || date.year > 9999)
+        ) {
+            date = date.with({
+                year: Math.max(1, Math.min(9999, date.year)),
+            });
         }
 
-        return this.stripDirectionalityCharacters(date.toString());
+        displayFormat = { ...displayFormat, timeZone: this.timezone };
+        const dtf = new Intl.DateTimeFormat(this.getLocale(), displayFormat);
+        return this.stripDirectionalityCharacters(this._format(dtf, date));
     }
 
     public parse(value: any, parseFormat: any): Temporal.ZonedDateTime | null {
@@ -325,13 +290,13 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
             // The `Date` constructor accepts formats other than ISO 8601, so we need to make sure the
             // string is the right format first.
             if (ISO_8601_REGEX.test(value)) {
-                let date
+                let date;
 
                 try {
                     date = Temporal.ZonedDateTime.from(value);
 
                 } catch (ignored: any) {
-                    date = Temporal.Instant.from(value).toZonedDateTimeISO(this.timezone)
+                    date = Temporal.Instant.from(value).toZonedDateTimeISO(this.timezone);
                 }
 
                 if (this.isValid(date)) {
