@@ -60,7 +60,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     }
 
     public getMonth(date: Temporal.ZonedDateTime): number {
-        return date.month - 1;
+        return date.month;
     }
 
     public getDay(date: Temporal.ZonedDateTime): number {
