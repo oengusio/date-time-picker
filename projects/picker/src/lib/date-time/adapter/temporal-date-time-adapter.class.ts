@@ -263,7 +263,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
     ): Temporal.ZonedDateTime {
         return Temporal.ZonedDateTime.from({
             year,
-            month: month + 1,
+            month,
             day: date,
             hour: hours,
             minute: minutes,
