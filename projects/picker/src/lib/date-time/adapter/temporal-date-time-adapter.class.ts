@@ -336,7 +336,7 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
      * representation with the local date and time.
      */
     private _format(dtf: Intl.DateTimeFormat, date: Temporal.ZonedDateTime) {
-        return dtf.format(date.epochMilliseconds);
+        return dtf.format(date.toPlainDateTime());
     }
 
     private get timezone() {
