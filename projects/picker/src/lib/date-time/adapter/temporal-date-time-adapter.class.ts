@@ -131,7 +131,11 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
         });
         return range(12, i =>
             this.stripDirectionalityCharacters(
-                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ month: i + 1 }))
+                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({
+                    year: 2017,
+                    month: i + 1,
+                    day: 1,
+                }))
             )
         );
     }
@@ -144,7 +148,11 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
 
         return range(7, i =>
             this.stripDirectionalityCharacters(
-                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
+                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({
+                    year: 2017,
+                    month: 1,
+                    day: i + 1,
+                }))
             )
         );
     }
@@ -157,7 +165,11 @@ export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateT
 
         return range(31, i =>
             this.stripDirectionalityCharacters(
-                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({ day: i + 1 }))
+                this._format(dtf, Temporal.Now.zonedDateTimeISO(this.timezone).with({
+                    year: 2017,
+                    month: 1,
+                    day: i + 1,
+                }))
             )
         );
     }
