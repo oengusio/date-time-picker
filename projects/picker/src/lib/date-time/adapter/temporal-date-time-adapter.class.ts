@@ -20,7 +20,7 @@ const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|(?
 @Injectable()
 export class TemporalDateTimeAdapter extends DateTimeAdapter<Temporal.ZonedDateTime> {
     public firstMonthOfTheYear = 1;
-    public firstDayOfTheWeek = -2; // WHY THE FUCK. No I don't know why this is -2. But it seems correct
+    public firstDayOfTheWeek = 0;
 
     private readonly nanoSecondsInMinute = 60000000000;
 
